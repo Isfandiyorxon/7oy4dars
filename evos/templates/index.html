@@ -1,0 +1,45 @@
+{% extends 'base.html' %}
+
+{%block content %}
+
+<!---->
+<div class="d-flex flex-row-reverse mt-5 mb-2">
+    <a href="{% url 'dish_update' dish.pk %}" class="btn btn-success">Update</a>
+    <a href="{% url 'delate_dish' dish.pk %}" class="btn btn-danger">Delete</a>
+</div>
+
+
+<div class="container mt-5">
+<div class="row row-cols-1 row-cols-md-7 g-5 me-5">
+                <div class="col">
+                    <div class="card h-100">
+                        <a href="#">
+                            {% if dish.photo %}
+                                <img src="{{ dish.photo.url }}" class="card-img-top" alt="{{ dish.photo.name }}" />
+                            {% else %}
+                                <img src="https://mdbcdn.b-cdn.net/img/new/standard/city/042.webp" class="card-img-top" alt="Palm Springs Road" />
+                            {% endif %}
+                        </a>
+                        <div class="card-body">
+                            <a href="">
+                                <h4 class="card-title">{{ dish.name }}</h4>
+                            </a>
+                            <p class="card-text">
+                                {{ dish.about }}
+                            </p>
+                        </div>
+                        <div class="card-footer d-flex justify-content-between">
+                            <small class="text-muted">{{ dish.name }}</small>
+                            <a href="">
+                            <div class="card-footer d-flex justify-content-between">
+                                <small class="text-muted">{{ dish.category.name }}</small>
+                                </div>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+        </div>
+</div>
+</div>
+
+{% endblock content %}

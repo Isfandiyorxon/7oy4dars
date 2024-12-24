@@ -1,0 +1,13 @@
+{% extends 'base.html' %}
+
+
+{% block content %}
+<form method="post" action="{%url 'delate_dish' dish.pk%}">
+    {% csrf_token %}
+    <p><b>{{dish}}</b></p>
+    <p>siz bu ovqatni sotuvdan olib tashlamoqchisizmi???</p>
+
+    <button type="submit" class="btn btn-primary ">Ha 😊 </button>
+    <a href="{%url 'dish_detaling' dish.pk%}">Ortga 😢</a>
+</form>
+{% endblock content %}
