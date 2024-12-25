@@ -1,6 +1,9 @@
 from django.shortcuts import render,get_object_or_404,redirect
 from .models import Category,Dish
-from .forms import OvqatFrom
+from django.contrib.auth.models import User
+from .forms import OvqatFrom,RegistrationForm,LoginForm
+from django.contrib.auth import authenticate, login, logout
+
 # Create your views here.
 
 def home(request ):
@@ -21,7 +24,7 @@ def dish_detaling(request,pk):
     }
     return render(request,'index.html',context)
 def dish_to_category(request,pk):
-    dish=Dish.objects.filter(pk=pk)
+    dish=Dish.objects.filter(category_id=pk)
     category =Category.objects.all()
     context={
         'dish':dish,
@@ -78,3 +81,47 @@ def delate_dish(request,pk):
         'dish':dish
     }
     return render(request,'delete_dish.html',context)
+
+def register(request):
+    if request.method == "POST":
+        form=RegistrationForm(data=request.POST)
+        if form.is_valid():
+            password=request.POST["password"]
+            password_repeat=request.POST["password_repeat"]
+            if password ==password_repeat:
+                username=request.POST['username']
+                email=request.POST['email']
+                user=User.objects.create_user(username,email,password)
+                print("Siz ro'yhatdan o'tdingiz!")
+                return redirect('login')
+    else:
+        form=RegistrationForm()
+
+        context={
+            'form':form
+        }
+        return render(request,'auth/register.html',context)
+
+def login_view(request):
+    if request.method == 'POST':
+        form=LoginForm(data=request.POST)
+        if form.is_valid():
+            username=request.POST["username"]
+            password=request.POST["password"]
+            user=authenticate(username=username,password=password)
+            if user is not None:
+                login(request, user)
+                print("Xush kelibsiz!")
+                return redirect('home')
+            else:
+                print('Username yoki parol hato')
+    else:
+        form=LoginForm()
+    context={
+            'form':form
+        }
+    return render(request,'auth/login.html',context)
+
+def logout_view(request):
+    logout(request)
+    return redirect('login')
