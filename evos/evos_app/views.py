@@ -1,7 +1,10 @@
+from django.contrib.messages.context_processors import messages
 from django.shortcuts import render,get_object_or_404,redirect
-from .models import Category,Dish
+from django.core.handlers.wsgi import WSGIRequest
+
+from .models import Category,Dish,Coments
 from django.contrib.auth.models import User
-from .forms import OvqatFrom,RegistrationForm,LoginForm
+from .forms import OvqatFrom,RegistrationForm,LoginForm,ComentForm
 from django.contrib.auth import authenticate, login, logout
 
 # Create your views here.
@@ -20,7 +23,9 @@ def dish_detaling(request,pk):
     category=Category.objects.all()
     context={
         'dish':dish,
-        'category':category
+        'category':category,
+        'comment_form':ComentForm,
+        'commnets':Coments.objects.filter(dish_id=pk)
     }
     return render(request,'index.html',context)
 def dish_to_category(request,pk):
@@ -125,3 +130,27 @@ def login_view(request):
 def logout_view(request):
     logout(request)
     return redirect('login')
+
+def comment_save(request,dish_id):
+    if request.user.is_authenticated:
+        if request.method == "POST":
+            form=ComentForm(data=request.POST)
+            if form.is_valid():
+                comment=Coments.objects.create(
+                    text=form.cleaned_data.get('text'),
+                    user=form.cleaned_data.get('user'),
+                    dish=get_object_or_404(Dish,pk=dish_id)
+                )
+                #messages.success(request,"Comment qo'shildi")
+        return redirect('dish_detaling',pk=dish_id)
+    else:
+       # messages.error(request, "Avval ro'yxatdan o'ting")
+        return redirect('login')
+
+def delete_comment(request,comment_id,dish_id):
+    commnet=get_object_or_404(Coments,pk=comment_id)
+    if commnet.user == request.user or request.user.is_superuser:
+        commnet.delate()
+        messages.success(request,"Comment o'chirildi!!!")
+    return redirect('dish_detaling',pk=dish_id)
+

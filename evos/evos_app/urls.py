@@ -1,5 +1,6 @@
 
-from .views import home,dish_detaling,dish_to_category,add_dish,update_dish,delate_dish,register,login_view,logout_view
+from .views import (home,dish_detaling,dish_to_category,add_dish,update_dish,delate_dish,register,login_view,logout_view,
+                    comment_save,delete_comment)
 from django.urls import path
 
 urlpatterns=[
@@ -14,6 +15,11 @@ path('dish_delete/<int:pk>/',delate_dish,name='delate_dish'),
 path('register/', register, name='register'),
 path('login/', login_view, name='login'),
 path('logout/', logout_view, name='logout'),
+
+path('dish_add_commnet/<dish_id>/',comment_save,name='comment_save'),
+path('dish_delete_commnet/<dish_id>/<int:post_id>',delete_comment,name='delete_comment'),
+
+
 ]
 
 

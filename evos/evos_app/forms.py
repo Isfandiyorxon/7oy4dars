@@ -1,4 +1,4 @@
-from .models import Dish,Category
+from .models import Dish,Category,Coments
 from django import forms
 
 class OvqatFrom(forms.Form):
@@ -45,3 +45,9 @@ class RegistrationForm(forms.Form):
 class LoginForm(forms.Form):
     username=forms.CharField(max_length=150,widget=forms.TextInput())
     password=forms.CharField(max_length=4,widget=forms.PasswordInput())
+
+
+class ComentForm(forms.ModelForm):
+    class Meta:
+        model=Coments
+        fields=['text']

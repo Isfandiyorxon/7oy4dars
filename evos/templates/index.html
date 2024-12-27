@@ -3,11 +3,12 @@
 {%block content %}
 
 <!---->
+{% if request.user.is_authenticated %}
 <div class="d-flex flex-row-reverse mt-5 mb-2">
     <a href="{% url 'dish_update' dish.pk %}" class="btn btn-success">Update</a>
     <a href="{% url 'delate_dish' dish.pk %}" class="btn btn-danger">Delete</a>
 </div>
-
+{%endif%}
 
 <div class="container mt-5">
 <div class="row row-cols-1 row-cols-md-7 g-5 me-5">
@@ -40,6 +41,32 @@
                 </div>
         </div>
 </div>
+</div>
+{% if request.user.is_authenticated %}
+<form class="mt-5" method="post" action="{% url 'comment_save' dish.pk %}">
+    {%csrf_token%}
+    <div class="form-outline" data-mdb-input-init>
+                {{ comment_form.text }}
+  <label class="form-label" for="textAreaExample">Message</label>
+</div>
+        <input type="submit" value="Save" class="btn btn-primary mt-2">
+</form>
+{% endif %}
+
+<div class="mt-5">
+    {% for comment in commnets %}
+<div class="card border border-success shadow-0 mb-3" style="max-width: 90rem;">
+  <div class="card-header">{{ comment.user.username }}
+  {% if comment.user == request.user or request.user.is_superuser %}
+  <a href="{% url 'delete_comment' comment.pk dish.pk %}"> O'CHIRISH</a>
+      {% endif %}
+  </div>
+  <div class="card-body text-success">
+    <h5 class="card-title">{{ comment.created }}</h5>
+    <p class="card-text">{{ comment.text }}</p>
+  </div>
+</div>
+{% endfor %}
 </div>
 
 {% endblock content %}

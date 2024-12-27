@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Category,Dish
+from .models import Category,Dish,Coments
 from django.utils.safestring import mark_safe
 
 # Register your models here.
@@ -21,6 +21,7 @@ class DishAdmin(admin.ModelAdmin):
         get_images.short_description = 'Rasmi'
 
 admin.site.register(Dish, DishAdmin)
+admin.site.register(Coments)
 
 
 
