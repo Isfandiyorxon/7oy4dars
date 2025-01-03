@@ -37,3 +37,4 @@ class Coments(models.Model):
         verbose_name_plural='komentariyalar'
         ordering = ['-created']
 
+

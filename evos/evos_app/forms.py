@@ -51,3 +51,14 @@ class ComentForm(forms.ModelForm):
     class Meta:
         model=Coments
         fields=['text']
+
+class MyEmailForm(forms.Form):
+    subject=forms.CharField(max_length=150,widget=forms.TextInput(attrs={
+        "class":"form-control"
+    }))
+    message=forms.CharField(max_length=1000,widget=forms.Textarea(attrs={
+        "class": "form-control",
+        "maxlength":"1000",
+        "rows":"4"
+
+    }))

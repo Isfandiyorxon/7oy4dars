@@ -1,11 +1,17 @@
+from django.contrib.auth.decorators import permission_required,login_required
+
 from django.contrib.messages.context_processors import messages
 from django.shortcuts import render,get_object_or_404,redirect
 from django.core.handlers.wsgi import WSGIRequest
 
 from .models import Category,Dish,Coments
 from django.contrib.auth.models import User
-from .forms import OvqatFrom,RegistrationForm,LoginForm,ComentForm
+from .forms import OvqatFrom,RegistrationForm,LoginForm,ComentForm,MyEmailForm
 from django.contrib.auth import authenticate, login, logout
+
+from django.core.mail import send_mail
+
+from django.conf import settings
 
 # Create your views here.
 
@@ -17,7 +23,7 @@ def home(request ):
         'dish':dish
     }
     return render(request,'home.html',context)
-
+@login_required(login_url='login')
 def dish_detaling(request,pk):
     dish=get_object_or_404(Dish,pk=pk)
     category=Category.objects.all()
@@ -36,6 +42,7 @@ def dish_to_category(request,pk):
         'category':category
     }
     return render(request,'home.html',context)
+@permission_required('evos_app.add_dish','home')
 def add_dish(request):
     if request.method == 'POST':
         form=OvqatFrom(data=request.POST,files=request.FILES)
@@ -50,7 +57,7 @@ def add_dish(request):
             'form':form
         }
         return render(request,'add_dish.html',context)
-
+@permission_required('evos_app.change_dish','home')
 def update_dish(request,pk):
     dish=get_object_or_404(Dish,pk=pk)
     if request.method=='POST':
@@ -75,6 +82,7 @@ def update_dish(request,pk):
     }
 
     return render(request,'add_dish.html',context)
+@permission_required('evos_app.delete_dish','home')
 
 def delate_dish(request,pk):
     dish=get_object_or_404(Dish,pk=pk)
@@ -153,4 +161,25 @@ def delete_comment(request,comment_id,dish_id):
         commnet.delate()
         messages.success(request,"Comment o'chirildi!!!")
     return redirect('dish_detaling',pk=dish_id)
+
+def send_message_email(request:WSGIRequest):
+    if request.user.is_staff:
+        if request.method == 'POST':
+            form =MyEmailForm(data=request.POST)
+            if form.is_valid():
+                for user in User.objects.all():
+                    send_mail(
+                        form.cleaned_data.get('subject'),
+                        form.cleaned_data.get('message'),
+                        settings.EMAIL_HOST_USER,
+                        [user.email]
+
+                    )
+        context={
+            "form":MyEmailForm()
+        }
+        return render(request,'send_email.html',context)
+    else:
+        messages.error(request,"sizga mumkin emas 😒😒😒")
+        return redirect('home')
 

@@ -5,8 +5,14 @@
 <!---->
 {% if request.user.is_authenticated %}
 <div class="d-flex flex-row-reverse mt-5 mb-2">
+    {% if perms.evos_app.change_dish %}
     <a href="{% url 'dish_update' dish.pk %}" class="btn btn-success">Update</a>
+    {% endif%}
+    {% if perms.news.delete_dish %}
     <a href="{% url 'delate_dish' dish.pk %}" class="btn btn-danger">Delete</a>
+        {% endif%}
+
+
 </div>
 {%endif%}
 

@@ -1,4 +1,5 @@
 <!-- Navbar -->
+
 <nav class="navbar navbar-expand-lg navbar-light bg-body-tertiary">
   <!-- Container wrapper -->
 
@@ -49,9 +50,12 @@
       {{ request.user.username }}
 
       {% if request.user.is_authenticated%}
+
+      {% if perms.evos_app.add_dish  %}
       <a class="text-reset me-3" href="{% url 'add_dish' %}">
         <i class="fas fa-plus"></i>
       </a>
+      {% endif %}
       {% endif %}
 
 
