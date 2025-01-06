@@ -5,7 +5,7 @@ from django.shortcuts import render,get_object_or_404,redirect
 from django.core.handlers.wsgi import WSGIRequest
 
 from .models import Category,Dish,Coments,MyUser
-from .forms import OvqatFrom,RegistrationForm,LoginForm,ComentForm,MyEmailForm
+from .forms import OvqatForm,RegistrationForm,LoginForm,ComentForm,MyEmailForm
 from django.contrib.auth import authenticate, login, logout
 
 from django.core.mail import send_mail
@@ -48,7 +48,9 @@ def add_dish(request):
     if request.method == 'POST':
         form=OvqatFrom(data=request.POST,files=request.FILES)
         if form.is_valid():
-            dish=form.create(request)
+            dish=form.save(commit=False)
+            dish.chef=request.user
+            dish.save()
             messages.success(request,f"{dish.name} qo'shildi")
             return redirect('dish_detaling',pk=dish.pk)
         else:
@@ -59,34 +61,52 @@ def add_dish(request):
             'form':form
         }
         return render(request,'add_dish.html',context)
-@permission_required('evos_app.change_dish','home')
-def update_dish(request,pk):
-    dish=get_object_or_404(Dish,pk=pk)
-    if dish.chef == request.user or request.user.is_superuser:
-        if request.method=='POST':
-            form=OvqatFrom(request,data=request.POST,files=request.FILES)
-            if form.is_valid():
-                dish.name=form.cleaned_data.get("name")
-                dish.about=form.cleaned_data.get("about")
-                dish.photo=form.cleaned_data.get("photo")if form.cleaned_data.get("photo") else dish.photo
-                dish.category=form.cleaned_data["category"]
-                dish.save()
-                return redirect('dish_detaling',pk=dish.pk)
-        form=OvqatFrom(initial={
-            "name":dish.name,
-            'about':dish.about,
-            'photo':dish.photo,
-            "category":dish.category
-        })
 
+
+@permission_required('evos_app.change_dish','home')
+def update_dish(request:WSGIRequest,pk:int):
+    dish=get_object_or_404(Dish,pk=pk)
+    if request.method == "POST":
+        form =OvqatFrom(data=request.POST,files=request.FILES,instance=dish)
+        if form.is_valid:
+            form.save()
+    else:
+        form =OvqatFrom(instance=dish)
         context={
             'form':form,
             'dish':dish
         }
-
         return render(request,'add_dish.html',context)
-    else:
-        messages.error(request,"sizda bundeay huquq yo'q😒😒😒😒")
+
+
+# @permission_required('evos_app.change_dish','home')
+# def update_dish(request,pk):
+#     dish=get_object_or_404(Dish,pk=pk)
+#     if dish.chef == request.user or request.user.is_superuser:
+#         if request.method=='POST':
+#             form=OvqatFrom(request,data=request.POST,files=request.FILES)
+#             if form.is_valid():
+#                 dish.name=form.cleaned_data.get("name")
+#                 dish.about=form.cleaned_data.get("about")
+#                 dish.photo=form.cleaned_data.get("photo")if form.cleaned_data.get("photo") else dish.photo
+#                 dish.category=form.cleaned_data["category"]
+#                 dish.save()
+#                 return redirect('dish_detaling',pk=dish.pk)
+#         form=OvqatFrom(initial={
+#             "name":dish.name,
+#             'about':dish.about,
+#             'photo':dish.photo,
+#             "category":dish.category
+#         })
+#
+#         context={
+#             'form':form,
+#             'dish':dish
+#         }
+#
+#         return render(request,'add_dish.html',context)
+#     else:
+#         messages.error(request,"sizda bundeay huquq yo'q😒😒😒😒")
 @permission_required('evos_app.delete_dish','home')
 
 def delate_dish(request,pk):
@@ -196,3 +216,13 @@ def search_view(request:WSGIRequest):
             "dish":dish
         }
         return render(request,'home.html',context)
+@login_required()
+def profil(request:WSGIRequest,user_id:int):
+    user=MyUser.objects.get(pk=user_id)
+    context={
+        'user':user
+    }
+    return render(request,'auth/profile.html',context)
+
+from django.shortcuts import render
+

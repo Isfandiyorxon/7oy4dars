@@ -6,9 +6,9 @@ from django.utils.safestring import mark_safe
 admin.site.register(Category)
 
 class DishAdmin(admin.ModelAdmin):
-    list_display=('pk','name','category','get_images')
+    list_display=('pk','name','category','chef','get_images')
     list_display_links = ('name','pk')
-    list_editable = ('category',)
+    list_editable = ('category','chef')
     list_filter = ('category',)
     search_fields = ('pk','name','about')
     list_per_page = 5

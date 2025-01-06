@@ -3,31 +3,66 @@ from django import forms
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
 
-class OvqatFrom(forms.Form):
+class OvqatForm(forms.ModelForm):
+    class Meta :
+        model=Dish
+        fields=['name','category','photo','about']
 
-    name=forms.CharField(max_length=150,widget=forms.TextInput(attrs={
-        "placeholder": "Ovqat nomi",
-        'class': "form-control"
-    }))
+        widgets={
+            'name':forms.TextInput(attrs={
+                "placeholder": "Ovqat nomi",
+                 'class': "form-control"
+            }),
+        "about":forms.Textarea(attrs={
+            "placeholder": "Ovqat haqida",
+                     'class': "form-control",
+                     'rows':3
+        })
 
-    about=forms.CharField(max_length=150,widget=forms.Textarea(attrs={
-        "placeholder": "Ovqat haqida",
-        'class': "form-control",
-        'rows':3
-    }))
-    photo=forms.ImageField(required=False,widget=forms.FileInput())
-    category=forms.ModelChoiceField(queryset=Category.objects.all(),
-                               widget=forms.Select(attrs={
-                                   'class': 'form-select'
+        }
+        labels={
+            'name':'Ovqat nomi',
+            'about':'ovqat haqida   '
+        }
+        help_texts={
+            'name':'Maksimal uzunlik 150 ta belgi',
+            'about':'holaganizvcha yozin'
+        }
 
-                               }))
-
-
-    # def __init__(self,request,data=None, files=None,initial=None):
-    #     super().__init__(data=data, files=files , initial=initial)
-    #     if not request.user.is_superuser and 'update'  not in request.path:
-    #         self.chef = forms.ModelChoiceField(queryset=User.objects.all(),
-    #                                       widget=forms.Select())
+        error_messages={
+            'name':{
+                'max_length':'maximal 150 ta simvol',
+                'required':'bu ustun majburiy'
+            },
+        }
+        # field_classes={
+        #         'about':forms.CharField
+        # }
+        # class OvqatFrom(forms.Form):
+#
+#     name=forms.CharField(max_length=150,widget=forms.TextInput(attrs={
+#         "placeholder": "Ovqat nomi",
+#         'class': "form-control"
+#     }))
+#
+#     about=forms.CharField(max_length=150,widget=forms.Textarea(attrs={
+#         "placeholder": "Ovqat haqida",
+#         'class': "form-control",
+#         'rows':3
+#     }))
+#     photo=forms.ImageField(required=False,widget=forms.FileInput())
+#     category=forms.ModelChoiceField(queryset=Category.objects.all(),
+#                                widget=forms.Select(attrs={
+#                                    'class': 'form-select'
+#
+#                                }))
+#
+#
+#     # def __init__(self,request,data=None, files=None,initial=None):
+#     #     super().__init__(data=data, files=files , initial=initial)
+#     #     if not request.user.is_superuser and 'update'  not in request.path:
+#     #         self.chef = forms.ModelChoiceField(queryset=User.objects.all(),
+#     #                                       widget=forms.Select())
     def create(self,request):
         dish=Dish.objects.create(**self.cleaned_data)
         dish.chef = request.user

@@ -1,6 +1,6 @@
 
 from .views import (home,dish_detaling,dish_to_category,add_dish,update_dish,delate_dish,register,login_view,logout_view,
-                    comment_save,delete_comment,send_message_email)
+                    comment_save,delete_comment,send_message_email,profil)
 from django.urls import path
 
 urlpatterns=[
@@ -18,7 +18,10 @@ path('logout/', logout_view, name='logout'),
 
 path('dish_add_commnet/<dish_id>/',comment_save,name='comment_save'),
 path('dish_delete_commnet/<dish_id>/<int:post_id>',delete_comment,name='delete_comment'),
-path('send/email/',send_message_email)
+path('send/email/',send_message_email),
+
+
+path('profil/<int:user_id>/',profil,name='profil')
 
 
 ]
