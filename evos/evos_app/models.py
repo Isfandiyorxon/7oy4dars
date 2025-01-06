@@ -1,8 +1,14 @@
 from django.db import models
-from django.contrib.auth.models import User
+from django.contrib.auth.models import AbstractUser
+
 
 # Create your models here.
+class MyUser(AbstractUser):
+    phone_number=models.CharField(max_length=13,null=True,blank=True,verbose_name="Tel")
+    photo=models.ImageField(upload_to="users/photos",null=True,blank=True)
 
+    def __str__(self):
+        return self.username
 class Category(models.Model):
     name=models.CharField(max_length=150,unique=True)
     def __str__(self):
@@ -15,6 +21,8 @@ class Dish (models.Model):
     category=models.ForeignKey(Category,on_delete=models.CASCADE,verbose_name='ovqat turi')
     about=models.TextField(null=True,blank=True , verbose_name='ovqat haqida')
     photo=models.ImageField(upload_to='media/photos/')
+    chef=models.ForeignKey(MyUser,on_delete=models.SET_NULL,null=True)
+
     def __str__(self):
         return self.name
 
@@ -25,7 +33,7 @@ class Dish (models.Model):
 
 class Coments(models.Model):
     text=models.CharField(max_length=1000,verbose_name='koment matni')
-    user=models.ForeignKey(User,on_delete=models.SET_NULL,null=True)
+    user=models.ForeignKey(MyUser,on_delete=models.SET_NULL,null=True)
     dish=models.ForeignKey(Dish,on_delete=models.SET_NULL,null=True,verbose_name='Ovqat')
     created=models.DateTimeField(auto_now_add=True,verbose_name="qo'shilgan vaqti")
     def __str__(self):

@@ -139,3 +139,4 @@ EMAIL_HOST_USER ='madrahimovq@gmail.com'
 EMAIL_HOST_PASSWORD ='iden ombq fjll yebi'
 
 LOGIN_URL='/login/'
+AUTH_USER_MODEL="evos_app.MyUser"

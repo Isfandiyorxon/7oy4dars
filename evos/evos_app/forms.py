@@ -1,7 +1,10 @@
 from .models import Dish,Category,Coments
 from django import forms
+from django.contrib.auth.models import User
+from django.core.exceptions import ValidationError
 
 class OvqatFrom(forms.Form):
+
     name=forms.CharField(max_length=150,widget=forms.TextInput(attrs={
         "placeholder": "Ovqat nomi",
         'class': "form-control"
@@ -18,16 +21,29 @@ class OvqatFrom(forms.Form):
                                    'class': 'form-select'
 
                                }))
-    def create(self):
+
+
+    # def __init__(self,request,data=None, files=None,initial=None):
+    #     super().__init__(data=data, files=files , initial=initial)
+    #     if not request.user.is_superuser and 'update'  not in request.path:
+    #         self.chef = forms.ModelChoiceField(queryset=User.objects.all(),
+    #                                       widget=forms.Select())
+    def create(self,request):
         dish=Dish.objects.create(**self.cleaned_data)
+        dish.chef = request.user
+        dish.save()
         return dish
+
+def validate_username(username):
+    if " " in username:
+        raise ValidationError("use nameda bo'sh joy bo'lishu mumkin emans")
 
 class RegistrationForm(forms.Form):
     username=forms.CharField(max_length=150,error_messages={"error":"max 150 ta belgi bo'lishi kerak"},
                              widget=forms.TextInput(attrs={
                                  'id':'form3Example1cg',
                                  "class": "form-control form-control-lg"
-                             }))
+                             }),validators=[validate_username])
     email=forms.EmailField(widget=forms.EmailInput(attrs={
         "id": "form3Example3cg",
         "class": "form-control form-control-lg"
@@ -41,7 +57,13 @@ class RegistrationForm(forms.Form):
         "id": "form3Example4cdg",
         "class": "form-control form-control-lg"
     }))
-
+    def clean(self):
+        clean_data=super().clean()
+        password=clean_data.get("password")
+        password_repeat=clean_data.get("password_repeat")
+        if not password and not password_repeat or password_repeat != password:
+            return  ValidationError("Parollar bir biriga teng bo'lishi kerak")
+        return clean_data
 class LoginForm(forms.Form):
     username=forms.CharField(max_length=150,widget=forms.TextInput())
     password=forms.CharField(max_length=4,widget=forms.PasswordInput())

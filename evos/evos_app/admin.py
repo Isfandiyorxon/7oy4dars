@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Category,Dish,Coments
+from .models import Category,Dish,Coments,MyUser
 from django.utils.safestring import mark_safe
 
 # Register your models here.
@@ -22,6 +22,7 @@ class DishAdmin(admin.ModelAdmin):
 
 admin.site.register(Dish, DishAdmin)
 admin.site.register(Coments)
+admin.site.register(MyUser)
 
 
 

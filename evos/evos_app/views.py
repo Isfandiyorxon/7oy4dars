@@ -4,14 +4,15 @@ from django.contrib.messages.context_processors import messages
 from django.shortcuts import render,get_object_or_404,redirect
 from django.core.handlers.wsgi import WSGIRequest
 
-from .models import Category,Dish,Coments
-from django.contrib.auth.models import User
+from .models import Category,Dish,Coments,MyUser
 from .forms import OvqatFrom,RegistrationForm,LoginForm,ComentForm,MyEmailForm
 from django.contrib.auth import authenticate, login, logout
 
 from django.core.mail import send_mail
 
 from django.conf import settings
+
+from django.db.models import Q
 
 # Create your views here.
 
@@ -47,7 +48,8 @@ def add_dish(request):
     if request.method == 'POST':
         form=OvqatFrom(data=request.POST,files=request.FILES)
         if form.is_valid():
-            dish=form.create()
+            dish=form.create(request)
+            messages.success(request,f"{dish.name} qo'shildi")
             return redirect('dish_detaling',pk=dish.pk)
         else:
             print(form.errors)
@@ -60,28 +62,31 @@ def add_dish(request):
 @permission_required('evos_app.change_dish','home')
 def update_dish(request,pk):
     dish=get_object_or_404(Dish,pk=pk)
-    if request.method=='POST':
-        form=OvqatFrom(data=request.POST,files=request.FILES)
-        if form.is_valid():
-            dish.name=form.cleaned_data.get("name")
-            dish.about=form.cleaned_data.get("about")
-            dish.photo=form.cleaned_data.get("photo")if form.cleaned_data.get("photo") else dish.photo
-            dish.category=form.cleaned_data["category"]
-            dish.save()
-            return redirect('dish_detaling',pk=dish.pk)
-    form=OvqatFrom(initial={
-        "name":dish.name,
-        'about':dish.about,
-        'photo':dish.photo,
-        "category":dish.category
-    })
+    if dish.chef == request.user or request.user.is_superuser:
+        if request.method=='POST':
+            form=OvqatFrom(request,data=request.POST,files=request.FILES)
+            if form.is_valid():
+                dish.name=form.cleaned_data.get("name")
+                dish.about=form.cleaned_data.get("about")
+                dish.photo=form.cleaned_data.get("photo")if form.cleaned_data.get("photo") else dish.photo
+                dish.category=form.cleaned_data["category"]
+                dish.save()
+                return redirect('dish_detaling',pk=dish.pk)
+        form=OvqatFrom(initial={
+            "name":dish.name,
+            'about':dish.about,
+            'photo':dish.photo,
+            "category":dish.category
+        })
 
-    context={
-        'form':form,
-        'dish':dish
-    }
+        context={
+            'form':form,
+            'dish':dish
+        }
 
-    return render(request,'add_dish.html',context)
+        return render(request,'add_dish.html',context)
+    else:
+        messages.error(request,"sizda bundeay huquq yo'q😒😒😒😒")
 @permission_required('evos_app.delete_dish','home')
 
 def delate_dish(request,pk):
@@ -104,7 +109,7 @@ def register(request):
             if password ==password_repeat:
                 username=request.POST['username']
                 email=request.POST['email']
-                user=User.objects.create_user(username,email,password)
+                user=MyUser.objects.create_user(username,email,password)
                 print("Siz ro'yhatdan o'tdingiz!")
                 return redirect('login')
     else:
@@ -167,7 +172,7 @@ def send_message_email(request:WSGIRequest):
         if request.method == 'POST':
             form =MyEmailForm(data=request.POST)
             if form.is_valid():
-                for user in User.objects.all():
+                for user in MyUser.objects.all():
                     send_mail(
                         form.cleaned_data.get('subject'),
                         form.cleaned_data.get('message'),
@@ -183,3 +188,11 @@ def send_message_email(request:WSGIRequest):
         messages.error(request,"sizga mumkin emas 😒😒😒")
         return redirect('home')
 
+def search_view(request:WSGIRequest):
+    if request.GET.get('word',False):
+        word=request.GET.get('word')
+        dish=Dish.objects.filter(Q(name__icontains=word)|Q(dish__icontains=word))
+        context={
+            "dish":dish
+        }
+        return render(request,'home.html',context)
